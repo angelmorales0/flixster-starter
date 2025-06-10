@@ -11,6 +11,7 @@ const movies = () => {
   const [moviePageNumber, setMoviePageNumber] = useState(1);
   const [modal, setModal] = useState(false);
   const [modalMovie, setModalMovie] = useState();
+  const [sortMethod, setSortMethod] = useState();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -28,6 +29,8 @@ const movies = () => {
 
   const handleSearch = () => {
     const fetchSearchData = async () => {
+      console.log(sortMethod);
+
       const res = await fetch(
         `https://api.themoviedb.org/3/search/movie?query=${searchQuery}&page=1`,
         {
@@ -59,8 +62,20 @@ const movies = () => {
       }
     );
     const data = await response.json();
-    setMovies(data.results);
-    console.log(movieList);
+
+    let sortedResults = data.results;
+    if (sortMethod === "vote-average-highest") {
+      sortedResults = [...data.results].sort((a, b) => b.rating - a.rating);
+    } else if (sortMethod === "release-date-newest") {
+      sortedResults = [...data.results].sort(
+        (a, b) => Date.parse(b.release_date) - Date.parse(a.release_date)
+      );
+    } else if (sortMethod === "title-az") {
+      sortedResults = [...data.results].sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+    }
+    setMovies(sortedResults);
   };
 
   const loadMoreMovies = () => {
@@ -70,7 +85,7 @@ const movies = () => {
 
   useEffect(() => {
     fetchData(); // CALLS FETCH DATA ON PAGE LOAD ONLY
-  }, [moviePageNumber]);
+  }, [moviePageNumber, sortMethod]);
 
   useEffect(() => {
     if (showNowPlaying) {
@@ -89,6 +104,14 @@ const movies = () => {
   return (
     <div>
       <h1>Movie List</h1>
+      <select onChange={(e) => setSortMethod(e.target.value)}>
+        <option value="">None</option>
+
+        <option value="title-az">Title (A-Z)</option>
+        <option value="release-date-newest">Release Date (Newest)</option>
+        <option value="vote-average-highest">Vote Average (Highest)</option>
+      </select>
+
       <div>
         {modal && (
           <>

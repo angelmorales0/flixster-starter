@@ -3,19 +3,20 @@
 //The movie's vote average
 //CREATE A COMPONENT SHOWING ALL OF THIS
 
-import React from 'react';
-import './MovieCard.css'
+import React from "react";
+import "./MovieCard.css";
+import Modal from "./Modal.jsx";
 
-const MovieCard = (props) =>{
-    return (
-        <div className="movie-card">
+const MovieCard = (props) => {
+  return (
+    <>
+      <div className="movie-card" onClick={props.onClick}>
         <img className="card-image" src={props.poster_image}></img>
         <h2>{props.title}</h2>
         <p>Rating: {props.rating}</p>
-        
-        </div>
-    )
-
+      </div>
+    </>
+  );
 };
 
 export default MovieCard;

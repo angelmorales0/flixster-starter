@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MovieCard from "./moviecard";
 import movieData from "./data/data.js";
-
+import Modal from "./Modal.jsx";
 const api_read_token =
   "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjY2UxNmVjMDI2YjhmNzg5MTdlZGY2MGFkNzVlNWJiZCIsIm5iZiI6MTc0OTQ5NTg4Ny4zOSwic3ViIjoiNjg0NzMwNGY3ODgwMWJkYzdjOTEwMzkxIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.ZwEWcqlErEjRZVPsWGd-kn5cFea_4DP5W4to4zhxnl0";
 
@@ -9,8 +9,18 @@ const movies = () => {
   const [movieList, setMovies] = useState([]);
   const [showNowPlaying, setShowNowPlaying] = useState(true);
   const [moviePageNumber, setMoviePageNumber] = useState(1);
+  const [modal, setModal] = useState(false);
+  const [modalMovie, setModalMovie] = useState();
 
   const [searchQuery, setSearchQuery] = useState("");
+
+  const toggleModal = (props) => {
+    setModalMovie(props);
+    setModal(!modal);
+
+    //FIND AND SET MOVIE BY KEY?
+    console.log(movieList);
+  };
 
   const handleNowPlayingSwitch = () => {
     setShowNowPlaying(!showNowPlaying);
@@ -70,10 +80,28 @@ const movies = () => {
     }
   }, [showNowPlaying]);
 
+  /**
+   *    onClick={toggleModal}
+              
+
+              Should show in modal 
+   */
   return (
     <div>
       <h1>Movie List</h1>
       <div>
+        {modal && (
+          <>
+            <Modal
+              onClick={toggleModal}
+              poster_image={`https://image.tmdb.org/t/p/w500${modalMovie.poster_path}`}
+              title={modalMovie.title}
+              releaseDate={modalMovie.release_date}
+              overview={modalMovie.overview}
+              rating={modalMovie.popularity}
+            ></Modal>{" "}
+          </>
+        )}
         <input
           type="text"
           value={searchQuery}
@@ -91,6 +119,7 @@ const movies = () => {
           poster_image={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
           title={movie.title}
           rating={movie.popularity}
+          onClick={() => toggleModal(movie)}
         />
       ))}
       <div>

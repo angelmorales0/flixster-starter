@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import MovieCard from "./moviecard";
-import movieData from "./data/data.js";
 import Modal from "./Modal.jsx";
-const api_read_token =
-  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjY2UxNmVjMDI2YjhmNzg5MTdlZGY2MGFkNzVlNWJiZCIsIm5iZiI6MTc0OTQ5NTg4Ny4zOSwic3ViIjoiNjg0NzMwNGY3ODgwMWJkYzdjOTEwMzkxIiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.ZwEWcqlErEjRZVPsWGd-kn5cFea_4DP5W4to4zhxnl0";
+
+const api_read_token = import.meta.env.VITE_API_KEY;
 
 const movies = () => {
   const [movieList, setMovies] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [watched, setWatched] = useState([]);
+
   const [showNowPlaying, setShowNowPlaying] = useState(true);
   const [moviePageNumber, setMoviePageNumber] = useState(1);
   const [modal, setModal] = useState(false);
@@ -18,9 +20,21 @@ const movies = () => {
   const toggleModal = (props) => {
     setModalMovie(props);
     setModal(!modal);
+  };
 
-    //FIND AND SET MOVIE BY KEY?
-    console.log(movieList);
+  const toggleFavorite = (movie) => {
+    if (favorites.includes(movie.id)) {
+      setFavorites(favorites.filter((id) => id !== movie.id));
+    } else {
+      setFavorites([...favorites, movie.id]);
+    }
+  };
+  const toggleWatched = (movie) => {
+    if (watched.includes(movie.id)) {
+      setWatched(watched.filter((id) => id !== movie.id));
+    } else {
+      setWatched([...watched, movie.id]);
+    }
   };
 
   const handleNowPlayingSwitch = () => {
@@ -95,22 +109,9 @@ const movies = () => {
     }
   }, [showNowPlaying]);
 
-  /**
-   *    onClick={toggleModal}
-              
-
-              Should show in modal 
-   */
   return (
     <div>
       <h1>Movie List</h1>
-      <select onChange={(e) => setSortMethod(e.target.value)}>
-        <option value="">None</option>
-
-        <option value="title-az">Title (A-Z)</option>
-        <option value="release-date-newest">Release Date (Newest)</option>
-        <option value="vote-average-highest">Vote Average (Highest)</option>
-      </select>
 
       <div>
         {modal && (
@@ -121,7 +122,8 @@ const movies = () => {
               title={modalMovie.title}
               releaseDate={modalMovie.release_date}
               overview={modalMovie.overview}
-              rating={modalMovie.popularity}
+              rating={modalMovie.vote_average}
+              id={modalMovie.id}
             ></Modal>{" "}
           </>
         )}
@@ -136,15 +138,33 @@ const movies = () => {
           Show now Playing? {String(showNowPlaying)}
         </button>
       </div>
-      {movieList.map((movie) => (
-        <MovieCard
-          key={movie.id}
-          poster_image={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-          title={movie.title}
-          rating={movie.popularity}
-          onClick={() => toggleModal(movie)}
-        />
-      ))}
+      <div className="sort-by">
+        <p>Sort by?</p>
+        <select onChange={(e) => setSortMethod(e.target.value)}>
+          <option value="">None</option>
+
+          <option value="title-az">Title (A-Z)</option>
+          <option value="release-date-newest">Release Date (Newest)</option>
+          <option value="vote-average-highest">Vote Average (Highest)</option>
+        </select>
+      </div>
+      {movieList.length > 0 ? (
+        movieList.map((movie) => (
+          <MovieCard
+            key={movie.id}
+            poster_image={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+            title={movie.title}
+            rating={movie.vote_average}
+            onClick={() => toggleModal(movie)}
+            isFavorite={favorites.includes(movie.id)}
+            isWatched={watched.includes(movie.id)}
+            toggleFavorite={() => toggleFavorite(movie)}
+            toggleWatch={() => toggleWatched(movie)}
+          />
+        ))
+      ) : (
+        <p>No Movies Found :(</p>
+      )}
       <div>
         <h4>Page {moviePageNumber}</h4>
         <button onClick={loadMoreMovies}>Next Page</button>

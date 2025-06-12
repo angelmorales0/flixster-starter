@@ -1,9 +1,3 @@
-npmbody {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-}
-
 button {
   background-color: #282c34;
   color: white;
@@ -16,4 +10,9 @@ button {
 button:hover {
   background-color: #777;
   color: white;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }

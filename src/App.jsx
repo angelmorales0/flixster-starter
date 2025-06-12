@@ -3,16 +3,24 @@ import "./App.css";
 import MovieList from "./movieList";
 import Header from "./Header";
 import Footer from "./Footer";
-
-// import movieCard from './movieCard'
-const api_key = import.meta.env.VITE_API_KEY; // gets u api key
+import Sidebar from "./SideBar";
 
 const App = () => {
+  const [filter, setFilter] = useState("home");
+  const handleFilterChaneg = (newFilter) => {
+    setFilter(newFilter);
+  };
+
   return (
     <div className="App">
       <Header />
-      <MovieList />
-      <Footer />
+      <div className="main-content">
+        <Sidebar onButtonClick={handleFilterChaneg} />
+        <MovieList filter={filter} />
+      </div>
+      <div className="Footer">
+        <Footer />
+      </div>
     </div>
   );
 };

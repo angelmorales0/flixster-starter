@@ -1,50 +1,70 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import MovieCard from "./moviecard";
 import Modal from "./Modal.jsx";
 
 const api_read_token = import.meta.env.VITE_API_KEY;
 
-const movies = () => {
-  const [movieList, setMovies] = useState([]);
-  const [favorites, setFavorites] = useState([]);
-  const [watched, setWatched] = useState([]);
+const movies = ({ filter }) => {
+  const [originalMovieList, setOriginalMovieList] = useState([]);
 
+  const [movieList, setMovies] = useState([]);
+  const [favoriteMovieList, setFavoriteMovieList] = useState([]);
+  const [wacthedMovieList, setWatchedMovieList] = useState([]);
   const [showNowPlaying, setShowNowPlaying] = useState(true);
-  const [moviePageNumber, setMoviePageNumber] = useState(1);
-  const [modal, setModal] = useState(false);
-  const [modalMovie, setModalMovie] = useState();
   const [sortMethod, setSortMethod] = useState();
 
+  const [modal, setModal] = useState(false);
+  const [modalMovie, setModalMovie] = useState();
+
+  const [moviePageNumber, setMoviePageNumber] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
+  //Code block below toggles modal, favorite stauts,  and watch status
   const toggleModal = (props) => {
     setModalMovie(props);
     setModal(!modal);
   };
-
   const toggleFavorite = (movie) => {
-    if (favorites.includes(movie.id)) {
-      setFavorites(favorites.filter((id) => id !== movie.id));
+    if (favoriteMovieList.includes(movie.id)) {
+      setFavoriteMovieList(favoriteMovieList.filter((id) => id !== movie.id));
     } else {
-      setFavorites([...favorites, movie.id]);
+      setFavoriteMovieList([...favoriteMovieList, movie.id]);
     }
   };
   const toggleWatched = (movie) => {
-    if (watched.includes(movie.id)) {
-      setWatched(watched.filter((id) => id !== movie.id));
+    if (wacthedMovieList.includes(movie.id)) {
+      setWatchedMovieList(wacthedMovieList.filter((id) => id !== movie.id));
     } else {
-      setWatched([...watched, movie.id]);
+      setWatchedMovieList([...wacthedMovieList, movie.id]);
     }
   };
+
+  //This use Effect is used to set the movie Filters for watched and favorited
+  useEffect(() => {
+    if (filter === "home") {
+      setMovies(originalMovieList);
+    } else if (filter === "favorites") {
+      setMovies(
+        originalMovieList.filter((movie) =>
+          favoriteMovieList.includes(movie.id)
+        )
+      );
+    } else if (filter === "watched") {
+      setMovies(
+        originalMovieList.filter((movie) => wacthedMovieList.includes(movie.id))
+      );
+    }
+  }, [filter]);
 
   const handleNowPlayingSwitch = () => {
     setShowNowPlaying(!showNowPlaying);
   };
-
-  const handleSearch = () => {
+  const clearSearch = () => {
+    setSearchQuery("");
+    setShowNowPlaying(true);
+  };
+  const searchForMovies = () => {
     const fetchSearchData = async () => {
-      console.log(sortMethod);
-
       const res = await fetch(
         `https://api.themoviedb.org/3/search/movie?query=${searchQuery}&page=1`,
         {
@@ -56,8 +76,8 @@ const movies = () => {
         }
       );
       const searchData = await res.json();
-      console.log(searchData);
       setMovies(searchData.results);
+      setShowNowPlaying(false);
     };
     fetchSearchData();
   };
@@ -65,7 +85,7 @@ const movies = () => {
   //FETCH DATA FIRST
 
   const fetchData = async () => {
-    const response = await fetch(
+    const fetchedMovieResponse = await fetch(
       `https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=${moviePageNumber}`,
       {
         method: "GET",
@@ -75,37 +95,45 @@ const movies = () => {
         },
       }
     );
-    const data = await response.json();
+    const fetchedMovieData = await fetchedMovieResponse.json();
 
-    let sortedResults = data.results;
+    let sortedResults = fetchedMovieData.results;
+    console.log(fetchedMovieData.results);
     if (sortMethod === "vote-average-highest") {
-      sortedResults = [...data.results].sort((a, b) => b.rating - a.rating);
+      sortedResults = [...fetchedMovieData.results].sort(
+        (a, b) => b.vote_average - a.vote_average
+      );
     } else if (sortMethod === "release-date-newest") {
-      sortedResults = [...data.results].sort(
+      sortedResults = [...fetchedMovieData.results].sort(
         (a, b) => Date.parse(b.release_date) - Date.parse(a.release_date)
       );
     } else if (sortMethod === "title-az") {
-      sortedResults = [...data.results].sort((a, b) =>
+      sortedResults = [...fetchedMovieData.results].sort((a, b) =>
         a.title.localeCompare(b.title)
       );
     }
-    setMovies(sortedResults);
+    if (moviePageNumber == 1) {
+      setMovies(sortedResults);
+      setOriginalMovieList(sortedResults);
+    } else {
+      setMovies([...movieList, ...sortedResults]);
+    }
   };
 
   const loadMoreMovies = () => {
     setMoviePageNumber(moviePageNumber + 1);
   };
-  //https://api.themoviedb.org/3/search/keyword
 
+  //Used to fetch movie data on new page load OR when a new sort method is called
   useEffect(() => {
-    fetchData(); // CALLS FETCH DATA ON PAGE LOAD ONLY
+    fetchData();
   }, [moviePageNumber, sortMethod]);
 
   useEffect(() => {
     if (showNowPlaying) {
       fetchData();
     } else {
-      handleSearch();
+      searchForMovies();
     }
   }, [showNowPlaying]);
 
@@ -127,13 +155,23 @@ const movies = () => {
             ></Modal>{" "}
           </>
         )}
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(searchBar) => setSearchQuery(searchBar.target.value)}
-          placeholder="Search"
-        />
-        <button onClick={handleSearch}>Search</button>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault(); // Prevents page reload
+            searchForMovies();
+          }}
+        >
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search"
+          />
+          <button type="submit">Search</button>
+          <button type="button" onClick={clearSearch}>
+            Clear
+          </button>
+        </form>
         <button onClick={handleNowPlayingSwitch}>
           Show now Playing? {String(showNowPlaying)}
         </button>
@@ -148,23 +186,25 @@ const movies = () => {
           <option value="vote-average-highest">Vote Average (Highest)</option>
         </select>
       </div>
-      {movieList.length > 0 ? (
-        movieList.map((movie) => (
-          <MovieCard
-            key={movie.id}
-            poster_image={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-            title={movie.title}
-            rating={movie.vote_average}
-            onClick={() => toggleModal(movie)}
-            isFavorite={favorites.includes(movie.id)}
-            isWatched={watched.includes(movie.id)}
-            toggleFavorite={() => toggleFavorite(movie)}
-            toggleWatch={() => toggleWatched(movie)}
-          />
-        ))
-      ) : (
-        <p>No Movies Found :(</p>
-      )}
+      <ul className="movie-list">
+        {movieList.length > 0 ? (
+          movieList.map((movie) => (
+            <MovieCard
+              key={movie.id}
+              poster_image={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+              title={movie.title}
+              rating={movie.vote_average}
+              onClick={() => toggleModal(movie)}
+              isFavorite={favoriteMovieList.includes(movie.id)}
+              isWatched={wacthedMovieList.includes(movie.id)}
+              toggleFavorite={() => toggleFavorite(movie)}
+              toggleWatch={() => toggleWatched(movie)}
+            />
+          ))
+        ) : (
+          <p>No Movies Found :(</p>
+        )}
+      </ul>
       <div>
         <h4>Page {moviePageNumber}</h4>
         <button onClick={loadMoreMovies}>Next Page</button>

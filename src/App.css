@@ -11,19 +11,26 @@
   color: white;
   padding: 20px;
 }
-
-@media (max-width: 600px) {
+.main-content {
+  display: flex;
+  flex-direction: row; /* Arrange children side by side */
+  min-height: 80vh; /* Optional: ensures content fills the page */
+}
+@media (max-width: 900px) {
+  .movie-list {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    padding: 1rem;
+    gap: 1rem;
+  }
   .movie-card {
-    width: 100%;
+    max-width: 180px;
   }
-
-  .search-bar {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .search-bar form {
-    flex-direction: column;
+}
+@media (max-width: 600px) {
+  .movie-list {
+    grid-template-columns: 1fr;
+    padding: 0.5rem;
+    gap: 0.5rem;
   }
 }
 .sort-by {
@@ -31,4 +38,39 @@
   align-items: center;
   gap: 0.5rem;
   padding-left: 38%;
+}
+
+.sidebar {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 150px;
+  background: #000000;
+  min-height: 100vh;
+}
+.sidebar button {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  font-size: 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.sidebar button:last-child {
+  margin-bottom: 0;
+}
+.sidebar button:hover,
+.sidebar button:focus {
+  background: #e0e0e0;
+  outline: none;
+}
+.Footer {
+  align-items: center;
+  justify-content: center;
+  padding-left: 30px;
+  background-color: antiquewhite;
+  position: absolute;
+  width: 100vw;
 }

@@ -1,30 +1,28 @@
-//The movie's title
-//The movie's poster image
-//The movie's vote average
-//CREATE A COMPONENT SHOWING ALL OF THIS
-
-import React from "react";
 import "./MovieCard.css";
-import Modal from "./Modal.jsx";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 
-const MovieCard = (props) => {
-  const isFavorite = props.isFavorite;
-  const isWatched = props.isWatched;
+const MovieCard = (movie) => {
+  const isFavorite = movie.isFavorite;
+  const isWatched = movie.isWatched;
   const heartClick = (e) => {
     e.stopPropagation();
-    props.toggleFavorite();
+    movie.toggleFavorite();
   };
   const watchClick = (e) => {
     e.stopPropagation();
-    props.toggleWatch();
+    movie.toggleWatch();
   };
   return (
     <>
-      <div className="movie-card" onClick={props.onClick}>
-        <img className="card-image" src={props.poster_image}></img>
-        <h2>{props.title}</h2>
-        <p>Rating: {props.rating}</p>
+      <div className="movie-card" onClick={movie.onClick}>
+        <img
+          alt={`coverart for the movie ${movie.title}`}
+          className="card-image"
+          src={movie.poster_image}
+        ></img>
+        <h2>{movie.title}</h2>
+
+        <p>Rating: {movie.rating}</p>
         <button onClick={heartClick}>
           Favorite
           {isFavorite ? <FaHeart color="red" /> : <FaRegHeart color="gray" />}

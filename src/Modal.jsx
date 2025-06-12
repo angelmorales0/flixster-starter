@@ -62,7 +62,7 @@ export default function Modal(props) {
           <section className="modal-content">
             <h2>{props.title}</h2>
             <img
-              alt={`coverart for the movie ${movie.title}`}
+              alt={`coverart for the movie ${props.title}`}
               src={props.poster_image}
             ></img>
             <iframe

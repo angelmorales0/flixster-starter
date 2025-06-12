@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import MovieList from "./movieList";
+import MovieList from "./MovieList";
 import Header from "./Header";
 import Footer from "./Footer";
 import Sidebar from "./SideBar";

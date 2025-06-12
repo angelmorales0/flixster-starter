@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import MovieCard from "./moviecard";
+import MovieCard from "./MovieCard";
 import Modal from "./Modal.jsx";
 
 const api_read_token = import.meta.env.VITE_API_KEY;
